@@ -3,7 +3,17 @@ import { tailwindConfig } from '@storefront-ui/vue/tailwind-config';
 import type { Config } from 'tailwindcss';
 import defaultTheme from 'tailwindcss/defaultTheme';
 
-const fontFamilyText = process.env.NUXT_PUBLIC_FONT || 'Red Hat Text';
+// Systemschrift statt Webfont. Der abgenommene Prototyp schreibt den Stapel aus
+// (system-ui, -apple-system, "Segoe UI", Roboto, Arial); hier stehen nur die
+// generischen Namen, weil @nuxt/fonts jede nicht-generische Familie als Webfont
+// aufloest und Roboto sonst doch wieder von Google geladen wuerde. ui-sans-serif
+// und system-ui treffen auf jeder Plattform dieselben Schnitte.
+const systemFontStack = defaultTheme.fontFamily.sans;
+
+// NUXT_PUBLIC_FONT bleibt der Schalter aus dem Shop-Editor. 'system-ui' ist der
+// Sonderfall und bedeutet: keine Schriftdatei nachladen.
+const fontFamilyText = process.env.NUXT_PUBLIC_FONT || 'system-ui';
+const fontFamilyBody = fontFamilyText === 'system-ui' ? systemFontStack : [fontFamilyText, ...systemFontStack];
 
 export default {
   presets: [tailwindConfig],
@@ -50,8 +60,10 @@ export default {
         '4xs': ['0.5625rem', { lineHeight: '0.75rem' }], // 9px
       },
       fontFamily: {
-        body: [`${fontFamilyText}`, ...defaultTheme.fontFamily.sans],
-        editor: ['Red Hat Text', ...defaultTheme.fontFamily.sans],
+        body: fontFamilyBody,
+        // Auch die Editor-Oberflaeche laeuft ohne Red Hat Text, sonst wandert die
+        // Schriftdatei ueber das gemeinsame CSS-Bundle in den Shop.
+        editor: systemFontStack,
       },
       colors: {
         primary: {
@@ -80,6 +92,25 @@ export default {
           '900': 'rgb(var(--colors-2-secondary-900) / <alpha-value>)',
           '950': 'rgb(var(--colors-2-secondary-950) / <alpha-value>)',
         },
+        // Feste Markentoene aus dem abgenommenen Prototyp
+        // vault-banjado/Outputs/prototypes/2026-08-17-shop-pwa-look-and-feel.html.
+        // Bewusst nicht an die generierte Palette gekoppelt: primary/secondary sind
+        // im Shop-Editor verstellbar, diese Werte sollen sich nicht mitverschieben.
+        brand: {
+          green: '#79A84A', // --bj-green, unveraendert aus banjado.com
+          'green-ink': '#5C8536', // --bj-green-700, textfaehig; #79A84A erreicht auf Weiss nur 2.8:1
+          'green-tint': '#F1F7EA', // --bj-green-50, Fokusring und ruhige Flaechen
+          orange: '#FCA23F', // --bj-orange, Zaehler und Faehnchen
+          'orange-ink': '#A8560A', // --bj-orange-700, dieselbe Farbe als Textfarbe
+          clay: '#A2866D', // --bj-clay, warmer Zweitton
+          ink: '#2A2E25', // --ink, Fliesstext
+          'ink-2': '#4A5145', // --ink-2, Icons und Sekundaertext
+          'ink-3': '#71786B', // --ink-3, Hilfstext
+          line: '#E3E1D9', // --line, Rahmen
+          'line-2': '#EFEEE8', // --line-2, feine Trenner
+          sand: '#F8F7F3', // --sand, hellste Flaeche; ersetzt die frueheren dunklen Baender
+        },
+
         editor: {
           'body-bg': '#F1F3F5',
           button: '#062633',
@@ -130,6 +161,14 @@ export default {
           '950': 'rgb(var(--colors-2-header-950) / <alpha-value>)',
         },
       },
+      // --radius-sm / --radius / --radius-lg aus dem Prototyp. Eigene Schluessel statt
+      // Ueberschreiben der Tailwind-Stufen, damit vorhandene rounded-* Klassen ihre
+      // Groesse behalten. Der alte Shop lief auf 0px.
+      borderRadius: {
+        'brand-sm': '8px',
+        brand: '12px',
+        'brand-lg': '18px',
+      },
       backgroundImage: {
         'editor-hatched': 'repeating-linear-gradient(45deg, #fafafa 0, #fafafa 6px, transparent 6px, transparent 12px)',
       },
@@ -145,6 +184,9 @@ export default {
         'block-outline': '0 0 0 1px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.95)',
         'block-outline-selected': '0 0 0 1.5px white, inset 0 0 0 1.5px white',
         'card-hover': '0 0 16px rgba(0, 0, 0, 0.12)',
+        // --shadow / --shadow-lg aus dem Prototyp: warmer Schatten auf Basis von --ink
+        brand: '0 1px 2px rgba(42, 46, 37, 0.05), 0 6px 20px -8px rgba(42, 46, 37, 0.14)',
+        'brand-lg': '0 2px 4px rgba(42, 46, 37, 0.06), 0 18px 44px -14px rgba(42, 46, 37, 0.22)',
       },
       transitionTimingFunction: {
         'editor-out': 'cubic-bezier(0.16, 1, 0.3, 1)',

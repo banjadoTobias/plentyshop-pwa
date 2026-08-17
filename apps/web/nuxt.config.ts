@@ -114,6 +114,9 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/image',
     '@nuxt/test-utils/module',
+    // vor @nuxtjs/i18n, sonst ist der Hook i18n:registerModule schon gelaufen
+    // und im Zubehoer-Kasten stuenden die rohen Uebersetzungsschluessel
+    '~~/modules/banjado-zubehoer',
     '@nuxtjs/i18n',
     '~~/modules/locale-routes',
     '@nuxtjs/tailwindcss',
@@ -171,6 +174,11 @@ export default defineNuxtConfig({
     confirmationUrl: paths.confirmation,
   },
   fonts: {
+    // Vuetify bringt font-family:var(--v-font-body,"Roboto",sans-serif) ins CSS.
+    // @nuxt/fonts findet das und laedt Roboto von Google nach — provider 'none'
+    // unterbindet das. Zusammen mit dem System-Stapel in tailwind.config.ts
+    // laedt der Shop damit keine einzige Schriftdatei mehr.
+    families: [{ name: 'Roboto', provider: 'none' }],
     defaults: {
       weights: [300, 400, 500, 700],
       preload: true,

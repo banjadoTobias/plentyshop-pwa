@@ -71,16 +71,21 @@ export default {
   sortingDynamicInherit: process.env.NUXT_PUBLIC_SORTING_DINAMIC_INHERIT || '[]',
   sortingDynamicPrio1: process.env.NUXT_PUBLIC_SORTING_DYNAMIC_PRIO1 || 'filter.prices.price_asc',
   sortingDynamicPrio2: process.env.NUXT_PUBLIC_SORTING_DYNAMIC_PRIO2 || 'filter.prices.price_asc',
-  themeColor: process.env.NUXT_PUBLIC_PRIMARY_COLOR || '#062633',
+  // Markenfarben banjado, am 17.08.2026 aus banjado.com ausgelesen und im Prototyp
+  // 2026-08-17-shop-pwa-look-and-feel.html abgenommen. Diese Defaults sind nur der
+  // Ausgangswert: zur Laufzeit gewinnt, was im Shop-Editor gespeichert ist.
+  themeColor: process.env.NUXT_PUBLIC_PRIMARY_COLOR || '#79A84A',
   headerLogo:
     process.env.NUXT_PUBLIC_HEADER_LOGO ||
     process.env.LOGO ||
     'https://cdn02.plentyone.com/mevofvd5omld/frontend/Logo/logo.svg',
   storename: process.env.NAME || 'PlentyONE GmbH',
-  font: process.env.NUXT_PUBLIC_FONT || 'Red Hat Text',
+  // 'system-ui' heisst: keine Webfont laden, siehe fontFamily in tailwind.config.ts
+  font: process.env.NUXT_PUBLIC_FONT || 'system-ui',
   verticalBlockSize: process.env.NUXT_PUBLIC_VERTICAL_BLOCK_SIZE || 'm',
   horizontalBlockSize: process.env.NUXT_PUBLIC_HORIZONTAL_BLOCK_SIZE || 's',
-  primaryColor: process.env.NUXT_PUBLIC_PRIMARY_COLOR || '#062633',
+  // Wird zu primary-500; die Palette leitet 50 bis 900 daraus ab
+  primaryColor: process.env.NUXT_PUBLIC_PRIMARY_COLOR || '#79A84A',
   defaultSortingOption: process.env.NUXT_PUBLIC_DEFAULT_SORTING_OPTION ?? 'texts.name1_asc',
   defaultSortingSearch: process.env.NUXT_PUBLIC_DEFAULT_SORTING_SEARCH ?? 'item.score',
   availableSortingOptions:
@@ -90,10 +95,13 @@ export default {
   recommendedSecondSortingOption: process.env.NUXT_PUBLIC_RECOMMENDED_SECOND_SORTING_OPTION ?? 'sorting.price.avg_asc',
   recommendedThirdSortingOption:
     process.env.NUXT_PUBLIC_RECOMMENDED_THIRD_SORTING_OPTION ?? 'variation.availability.averageDays_asc',
-  secondaryColor: process.env.NUXT_PUBLIC_SECONDARY_COLOR || '#31687d',
-  headerBackgroundColor:
-    process.env.NUXT_PUBLIC_HEADER_BACKGROUND_COLOR || process.env.NUXT_PUBLIC_PRIMARY_COLOR || '#062633',
-  iconColor: process.env.NUXT_PUBLIC_ICON_COLOR || '#ffffff',
+  // Taupe als warmer Zweitton; das bisherige Petrol #31687d war ein dunkler Fremdkoerper
+  secondaryColor: process.env.NUXT_PUBLIC_SECONDARY_COLOR || '#A2866D',
+  // Harte Vorgabe des Inhabers: keine dunklen Flaechen, die Kopfzeile bleibt weiss.
+  // Der fruehere Rueckfall auf die Primaerfarbe ist deshalb raus.
+  headerBackgroundColor: process.env.NUXT_PUBLIC_HEADER_BACKGROUND_COLOR || '#FFFFFF',
+  // --ink-2 aus dem Prototyp; weisse Icons waeren auf weisser Kopfzeile unsichtbar
+  iconColor: process.env.NUXT_PUBLIC_ICON_COLOR || '#4A5145',
   showCustomerWishComponent: process.env.NUXT_PUBLIC_SHOW_CUSTOMER_WISH_COMPONENT === 'true',
   showCustomerReferenceComponent: process.env.NUXT_PUBLIC_SHOW_CUSTOMER_REFERENCE_COMPONENT === 'true',
   bundleItemDisplay: process.env.NUXT_PUBLIC_BUNDLE_ITEM_DISPLAY || '2',

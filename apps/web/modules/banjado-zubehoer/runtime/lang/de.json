@@ -1,0 +1,13 @@
+{
+  "banjadoAccessories": {
+    "title": "Passendes Zubehör",
+    "hint": "optional dazubestellen",
+    "fallbackGroup": "Passendes Zubehör",
+    "groupSelectedOne": "{name} · + {price}",
+    "groupSelectedMany": "{count} ausgewählt · + {price}",
+    "selectItem": "{name} auswählen",
+    "noneSelected": "Kein Zubehör ausgewählt",
+    "someSelected": "{count} Zubehör ausgewählt (+ {price})",
+    "added": "{count} Zubehör in den Warenkorb gelegt"
+  }
+}
