@@ -267,14 +267,15 @@ const measureImage = (file: File): Promise<ImageDimensions | null> =>
   });
 
 /**
- * Ampel gegen die bedruckbare Flaeche. Rot heisst: wir nehmen die Datei nicht
- * an, weil sie als Reklamation zurueckkaeme. PDF messen wir nicht im Browser,
- * das prueft die Manufaktur von Hand.
+ * Ampel gegen die bedruckbare Flaeche. Rot warnt deutlich, blockiert aber nicht
+ * (Entscheidung Tobias, 18.08.2026): die Datei geht trotzdem hoch, die Manufaktur
+ * sieht jede Datei vor dem Druck. PDF messen wir nicht im Browser, das prueft
+ * die Manufaktur von Hand.
  */
-const checkBeforeUpload = async (file: File): Promise<boolean> => {
+const setNoticeForUpload = async (file: File): Promise<void> => {
   // Die Ampel rechnet gegen eine Produktflaeche. Fuer andere Datei-Eigenschaften
   // gaebe es nichts, wogegen zu rechnen waere — dort bleibt es bei Typ und Groesse.
-  if (!isWunschmotivProperty) return true;
+  if (!isWunschmotivProperty) return;
 
   if (isPdf(file)) {
     notice.value = {
@@ -283,7 +284,7 @@ const checkBeforeUpload = async (file: File): Promise<boolean> => {
       text: 'Wir sehen uns die Datei vor dem Druck an und melden uns, falls etwas fehlt.',
       fileName: file.name,
     };
-    return true;
+    return;
   }
 
   const dimensions = await measureImage(file);
@@ -295,13 +296,11 @@ const checkBeforeUpload = async (file: File): Promise<boolean> => {
       text: 'Wir prüfen sie von Hand und melden uns, falls etwas fehlt.',
       fileName: file.name,
     };
-    return true;
+    return;
   }
 
   const verdict = checkResolution(dimensions.width, dimensions.height, motivFormat);
   notice.value = { level: verdict.level, title: verdict.title, text: verdict.text, fileName: file.name };
-
-  return verdict.level !== 'bad';
 };
 
 const acceptFile = async (file: File | null) => {
@@ -319,12 +318,9 @@ const acceptFile = async (file: File | null) => {
 
   loading.value = true;
 
-  const printable = await checkBeforeUpload(file);
-  if (!printable) {
-    loading.value = false;
-    resetInput();
-    return;
-  }
+  // Nur warnen, nie blockieren (W1): die Ampel setzt den Hinweis, der Upload
+  // laeuft in jedem Fall weiter.
+  await setNoticeForUpload(file);
 
   const uploaded = await uploadWithTimeout(file);
 

@@ -1,6 +1,15 @@
 import type { Block } from '@plentymarkets/shop-api';
 import { v4 as uuid } from 'uuid';
+import { createBanjadoZubehoer } from '~~/modules/banjado-zubehoer/runtime/components/blocks/BanjadoZubehoer/defaults';
 
+/**
+ * banjado-Produktseite nach dem abgenommenen Prototyp v2 (17.08.2026):
+ * links die Galerie, rechts die Kauf-Box in Prototyp-Reihenfolge
+ * (Name, Bewertung, Preis, Varianten, Bestelleigenschaften = Motiv/Upload/
+ * Wunschtext, Menge + Warenkorb), darunter der Zubehoer-Kasten. Tags sind
+ * bewusst aus - Entscheidung W3 (18.08.2026): kein Tag ist fuer Kunden
+ * sichtbar, der Prototyp ist die Whitelist.
+ */
 export const createProduct = (): Block[] => {
   const itemTextTitle = t('defaultTemplate.product.itemText.title');
   const technicalDataTitle = t('defaultTemplate.product.technicalData.title');
@@ -40,7 +49,7 @@ export const createProduct = (): Block[] => {
           content: {
             thumbnails: {
               showThumbnails: true,
-              thumbnailType: 'left-vertical',
+              thumbnailType: 'bottom',
               enableHoverZoom: true,
             },
           },
@@ -57,11 +66,17 @@ export const createProduct = (): Block[] => {
             fields: {
               itemName: true,
               price: true,
-              tags: true,
+              // W3 (18.08.2026): kein Tag ist sichtbar
+              tags: false,
               availability: true,
               starRating: true,
               orderProperties: true,
-              variationProperties: true,
+              // Aus mit Absicht: variationProperties rendert ALLE Merkmale der
+              // Variante, auch die interne Steuerung (ZB_LINK, Suche_mehr_mit,
+              // GS_product_detail_*, Preisgueltigkeit ...). Der Prototyp ist die
+              // Whitelist (W3) - die Kunden-Fakten kommen spaeter als eigener
+              // Block, nicht ueber dieses Sammelfeld.
+              variationProperties: false,
               previewText: true,
               attributes: true,
               itemBundle: false,
@@ -73,18 +88,18 @@ export const createProduct = (): Block[] => {
             },
             fieldsOrder: [
               'itemName',
-              'price',
-              'tags',
-              'availability',
               'starRating',
-              'variationProperties',
-              'orderProperties',
+              'price',
               'previewText',
               'attributes',
+              'variationProperties',
+              'orderProperties',
               'itemBundle',
               'graduatedPrices',
               'addToWishlist',
               'quantityAndAddToCart',
+              'availability',
+              'tags',
               'itemText',
               'technicalData',
             ],
@@ -92,7 +107,7 @@ export const createProduct = (): Block[] => {
             wishlistSize: 'small',
             dropShadow: true,
             borders: true,
-            borderColor: '#EFF4F1',
+            borderColor: '#E3E1D9',
             layout: {
               paddingTop: 0,
               paddingBottom: 0,
@@ -100,6 +115,11 @@ export const createProduct = (): Block[] => {
               paddingLeft: 0,
             },
           },
+        },
+        {
+          // Zubehoer direkt unter der Kauf-Box, wie im Prototyp
+          ...createBanjadoZubehoer(),
+          parent_slot: 1,
         },
       ],
     },
@@ -137,7 +157,7 @@ export const createProduct = (): Block[] => {
         },
         layout: {
           displayAsCollapsable: true,
-          initiallyCollapsed: false,
+          initiallyCollapsed: true,
           paddingTop: 0,
           paddingBottom: 0,
           paddingLeft: 0,
@@ -188,8 +208,14 @@ export const createProduct = (): Block[] => {
         isGlobalTemplate: false,
       },
       content: {
+        text: {
+          pretitle: '',
+          title: 'Das könnte Ihnen auch gefallen',
+          subtitle: '',
+          htmlDescription: '',
+        },
         source: {
-          type: 'category',
+          type: 'cross_selling',
           itemId: '',
           categoryId: '',
           crossSellingRelation: 'Similar',

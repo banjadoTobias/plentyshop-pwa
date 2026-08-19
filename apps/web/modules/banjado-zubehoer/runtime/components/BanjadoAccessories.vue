@@ -7,8 +7,8 @@
     >
       <div class="flex items-center gap-2.5 px-4 py-3.5 bg-neutral-50 border-b border-neutral-100">
         <SfIconPackage size="sm" class="text-primary-700" />
-        <span class="font-bold">{{ t('banjadoAccessories.title') }}</span>
-        <span class="ml-auto text-sm text-neutral-500">{{ t('banjadoAccessories.hint') }}</span>
+        <span class="font-bold">{{ props.title || t('banjadoAccessories.title') }}</span>
+        <span class="ml-auto text-sm text-neutral-500">{{ props.hint || t('banjadoAccessories.hint') }}</span>
       </div>
 
       <BanjadoAccessoryGroup v-for="group in groups" :key="group.id" :group="group" />

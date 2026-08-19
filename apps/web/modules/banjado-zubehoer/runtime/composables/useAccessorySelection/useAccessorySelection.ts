@@ -1,7 +1,7 @@
 import { productGetters } from '@plentymarkets/shop-api';
 import type { Product } from '@plentymarkets/shop-api';
 import { CROSS_SELLING_RELATION_ACCESSORY, CROSS_SELLING_TYPE, DEFAULT_CATEGORY_ID } from '../../config/constants';
-import { applySelection } from '../../utils/applySelection';
+import { applyQuantity, applySelection } from '../../utils/applySelection';
 import { getEffectivePrice } from '../../utils/getEffectivePrice';
 import type { AccessoryGroup } from '../../utils/groupAccessories/types';
 import type { AccessorySelectionState } from './types';
@@ -9,19 +9,20 @@ import type { AccessorySelectionState } from './types';
 const STATE_KEY = 'banjadoAccessorySelection';
 
 /**
- * @description Haelt das Zubehoer des Artikels, der gerade auf dem Bildschirm steht, und die Haken darauf.
+ * @description Haelt das Zubehoer des Artikels, der gerade auf dem Bildschirm steht, und die Haken darauf
+ * samt Menge je Position (W2: eigener Mengenwaehler, weder fest 1 noch die Menge des Hauptartikels).
  * Der Zustand liegt bewusst global: die Komponente setzt die Haken, das Plugin liest sie beim
  * Warenkorb-Ereignis wieder aus.
  * @returns UseAccessorySelectionReturn
  * @example
  * ``` ts
- * const { fetchAccessories, toggle, isSelected, addSelectedToCart } = useAccessorySelection();
+ * const { fetchAccessories, toggle, setQuantity, isSelected, addSelectedToCart } = useAccessorySelection();
  * ```
  */
 export const useAccessorySelection = () => {
   const state = useState<AccessorySelectionState>(STATE_KEY, () => ({
     products: [],
-    selectedVariationIds: [],
+    selections: [],
     variationId: 0,
     loading: false,
     adding: false,
@@ -48,7 +49,7 @@ export const useAccessorySelection = () => {
 
     state.value.loading = true;
     state.value.products = [];
-    state.value.selectedVariationIds = [];
+    state.value.selections = [];
     state.value.variationId = productGetters.getVariationId(product);
 
     try {
@@ -66,11 +67,12 @@ export const useAccessorySelection = () => {
   };
 
   const isSelected = (product: Product) =>
-    state.value.selectedVariationIds.includes(productGetters.getVariationId(product));
+    state.value.selections.some((selection) => selection.variationId === productGetters.getVariationId(product));
 
   /**
    * @description Setzt oder nimmt den Haken. In Gruppen mit Einfachauswahl faellt der Haken
    * der Geschwister dabei weg, ein zweiter Klick auf denselben Artikel nimmt ihn zurueck.
+   * Jeder neue Haken startet mit Menge 1.
    * @param group Die Gruppe, in der der Artikel steht.
    * @param product Der angeklickte Zubehoer-Artikel.
    * @example
@@ -79,21 +81,49 @@ export const useAccessorySelection = () => {
    * ```
    */
   const toggle = (group: AccessoryGroup, product: Product) => {
-    state.value.selectedVariationIds = applySelection(state.value.selectedVariationIds, group, product);
+    state.value.selections = applySelection(state.value.selections, group, product);
+  };
+
+  /**
+   * @description Menge einer angehakten Position, sonst 0.
+   * @param product Der Zubehoer-Artikel.
+   * @example
+   * ``` ts
+   * quantityOf(accessory); // 5
+   * ```
+   */
+  const quantityOf = (product: Product) =>
+    state.value.selections.find((selection) => selection.variationId === productGetters.getVariationId(product))
+      ?.quantity ?? 0;
+
+  /**
+   * @description Stellt die Menge einer bereits angehakten Position ein. Unter 1 faellt
+   * nichts - abgewaehlt wird ueber den Haken, nicht ueber die Menge.
+   * @param product Der Zubehoer-Artikel.
+   * @param quantity Die gewuenschte Menge.
+   * @example
+   * ``` ts
+   * setQuantity(accessory, 5);
+   * ```
+   */
+  const setQuantity = (product: Product, quantity: number) => {
+    state.value.selections = applyQuantity(state.value.selections, productGetters.getVariationId(product), quantity);
   };
 
   const isMainProduct = (variationId: number) => state.value.variationId > 0 && state.value.variationId === variationId;
 
-  const selectedProducts = computed(() => state.value.products.filter((product) => isSelected(product)));
+  const selectedProducts = computed(() =>
+    state.value.products.filter((product) => isSelected(product)),
+  );
 
   const accessoriesTotal = computed(() =>
-    selectedProducts.value.reduce((total, product) => total + getEffectivePrice(product), 0),
+    selectedProducts.value.reduce((total, product) => total + getEffectivePrice(product) * quantityOf(product), 0),
   );
 
   /**
    * @description Legt jedes angehakte Zubehoer als eigene Position mit seiner eigenen
-   * Varianten-ID in den Warenkorb - ueber addItemsToCart, damit ein einziger Aufruf reicht
-   * und die Ereignisse der PWA wie gewohnt feuern.
+   * Varianten-ID und der eingestellten Menge in den Warenkorb - ueber addItemsToCart,
+   * damit ein einziger Aufruf reicht und die Ereignisse der PWA wie gewohnt feuern.
    * @return Promise<boolean>
    * @example
    * ``` ts
@@ -101,7 +131,7 @@ export const useAccessorySelection = () => {
    * ```
    */
   const addSelectedToCart = async () => {
-    if (state.value.adding || selectedProducts.value.length === 0) {
+    if (state.value.adding || state.value.selections.length === 0) {
       return false;
     }
 
@@ -109,14 +139,14 @@ export const useAccessorySelection = () => {
 
     try {
       const added = await addItemsToCart(
-        selectedProducts.value.map((product) => ({
-          productId: productGetters.getVariationId(product),
-          quantity: 1,
+        state.value.selections.map((selection) => ({
+          productId: selection.variationId,
+          quantity: selection.quantity,
         })),
       );
 
       if (added) {
-        state.value.selectedVariationIds = [];
+        state.value.selections = [];
       }
 
       return added;
@@ -129,6 +159,8 @@ export const useAccessorySelection = () => {
     fetchAccessories,
     isSelected,
     toggle,
+    quantityOf,
+    setQuantity,
     isMainProduct,
     addSelectedToCart,
     selectedProducts,

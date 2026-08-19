@@ -8,7 +8,11 @@ const CM_PER_INCH = 2.54;
 /** Ab hier reicht das Bild ohne Abstriche. */
 const RATIO_OK = 1;
 
-/** Darunter drucken wir nicht mehr, das Ergebnis kaeme als Reklamation zurueck. */
+/**
+ * Darunter wird der Druck sichtbar unscharf. Die Ampel warnt dann rot, nimmt die
+ * Datei aber trotzdem an (Entscheidung Tobias, 18.08.2026: nur warnen, nicht
+ * blockieren) - die Manufaktur sieht jede Datei vor dem Druck.
+ */
 const RATIO_WARN = 0.6;
 
 const toPixels = (centimeters: number): number => Math.round((centimeters / CM_PER_INCH) * PRINT_DPI);
@@ -75,9 +79,9 @@ export const checkResolution = (widthPx: number, heightPx: number, format: Motiv
   return {
     ...verdict,
     level,
-    title: 'Auflösung zu niedrig',
+    title: 'Auflösung zu niedrig — der Druck wird unscharf',
     text: measurable
-      ? `${size} ergeben nur ${dpi} dpi auf ${flaeche}. Empfohlen sind ${empfehlung}. Bitte schicken Sie das Original statt einer verkleinerten Kopie — oder wir suchen zusammen ein passendes Katalogmotiv.`
-      : `Wir konnten die Bildgröße nicht auslesen. Empfohlen sind ${empfehlung} für ${flaeche}.`,
+      ? `${size} ergeben nur ${dpi} dpi auf ${flaeche}. Empfohlen sind ${empfehlung}. Besser: Schicken Sie das Original statt einer verkleinerten Kopie. Wir haben die Datei angenommen und melden uns vor dem Druck, falls sie nicht reicht.`
+      : `Wir konnten die Bildgröße nicht auslesen. Empfohlen sind ${empfehlung} für ${flaeche}. Wir prüfen die Datei vor dem Druck von Hand.`,
   };
 };

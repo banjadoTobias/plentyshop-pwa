@@ -6,6 +6,9 @@
     "groupSelectedOne": "{name} · + {price}",
     "groupSelectedMany": "{count} selected · + {price}",
     "selectItem": "Select {name}",
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity of {name}",
+    "increase": "Increase quantity of {name}",
     "noneSelected": "No accessories selected",
     "someSelected": "{count} accessories selected (+ {price})",
     "added": "{count} accessories added to the cart"
