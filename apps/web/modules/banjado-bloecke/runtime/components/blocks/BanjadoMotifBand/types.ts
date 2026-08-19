@@ -21,6 +21,10 @@ export interface BanjadoMotifTile {
   link?: string;
 }
 
+// text und button sind bewusst nicht optional: die Editor-Formulare binden per
+// v-model direkt darauf, und vue-tsc (der Typecheck der PlentyONE-Bereitstellung)
+// lehnt den Zugriff auf moeglicherweise undefinierte Objekte ab. Die Formular-
+// Computed fuellt fehlende Felder zur Laufzeit auf.
 export interface BanjadoMotifBandContent {
   text: {
     eyebrow?: string;
@@ -29,7 +33,7 @@ export interface BanjadoMotifBandContent {
   };
   chips?: BanjadoMotifChip[];
   wall?: BanjadoMotifTile[];
-  button?: {
+  button: {
     label?: string;
     link?: string;
   };
