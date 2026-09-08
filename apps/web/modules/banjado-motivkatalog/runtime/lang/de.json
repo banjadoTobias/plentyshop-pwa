@@ -1,0 +1,44 @@
+{
+  "banjadoMotivkatalog": {
+    "title": "Motivauswahl",
+    "metaTitle": "Motivauswahl: {count} Motive für jedes banjado Produkt",
+    "metaDescription": "Alle {count} banjado Motive auf einen Blick. Nach Thema, Farbe, Neuheiten und Saison filtern und jedes Motiv auf Briefkasten, WC-Sitz, Herdabdeckplatte und mehr bestellen.",
+    "intro": "{count} Motive, filterbar nach Thema, Farbe, Neuheiten und Saison. Jedes Motiv gibt es auf jedem banjado Produkt – ein Klick auf das Motiv zeigt alle Produkte damit.",
+    "facets": {
+      "thema": "Thema",
+      "farbe": "Farbe",
+      "neu": "Neuheiten",
+      "saison": "Saison"
+    },
+    "filter": "Filter",
+    "openFilter": "Filtern",
+    "closeFilter": "Filter schließen",
+    "resetFilters": "Filter zurücksetzen",
+    "activeFilters": "Aktive Filter",
+    "removeFilter": "Filter {value} entfernen",
+    "showResults": "{count} Motiv anzeigen | {count} Motive anzeigen",
+    "showAll": "Alle {count} anzeigen",
+    "showLess": "Weniger anzeigen",
+    "popularThemes": "Beliebte Themen",
+    "search": {
+      "label": "Motiv oder Nummer suchen",
+      "placeholder": "Motiv oder Nummer, z. B. 10864 oder Bambus",
+      "clear": "Suche löschen"
+    },
+    "motifNoun": "Motiv | Motive",
+    "resultCount": "{count} Motiv | {count} Motive",
+    "shownOf": "{shown} von {total} angezeigt",
+    "loadMore": "Weitere {count} Motive laden",
+    "loading": "Motive werden geladen …",
+    "tile": {
+      "number": "Nr. {number}",
+      "alt": "Motiv {title} · Nr. {number}",
+      "viewProducts": "Alle Produkte mit diesem Motiv ansehen"
+    },
+    "empty": {
+      "title": "Kein Motiv gefunden",
+      "text": "Filter anpassen oder einen anderen Suchbegriff probieren."
+    },
+    "error": "Der Motivkatalog ist gerade nicht erreichbar. Bitte in ein paar Minuten noch einmal versuchen."
+  }
+}

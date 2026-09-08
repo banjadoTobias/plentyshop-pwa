@@ -1,7 +1,11 @@
 <template>
   <div>
     <EditorFormPanel v-model="open" title="Einträge" data-testid="banjado-trust-form">
-      <div v-for="(item, index) in trustContent.items" :key="index" class="border-b border-gray-200 py-2 last:border-b-0">
+      <div
+        v-for="(item, index) in trustContent.items"
+        :key="index"
+        class="border-b border-gray-200 py-2 last:border-b-0"
+      >
         <UiFormLabel>Eintrag {{ index + 1 }} — Titel</UiFormLabel>
         <SfInput v-model="item.title" type="text" />
         <UiFormLabel class="mt-2">Eintrag {{ index + 1 }} — Text</UiFormLabel>

@@ -1,6 +1,12 @@
 import { productGetters } from '@plentymarkets/shop-api';
-import type { Product } from '@plentymarkets/shop-api';
-import { CROSS_SELLING_RELATION_ACCESSORY, CROSS_SELLING_TYPE, DEFAULT_CATEGORY_ID } from '../../config/constants';
+import type { ApiError, Product } from '@plentymarkets/shop-api';
+import {
+  ACCESSORY_ITEMS_PER_PAGE,
+  ACCESSORY_SORT,
+  CROSS_SELLING_RELATION_ACCESSORY,
+  CROSS_SELLING_TYPE,
+  DEFAULT_CATEGORY_ID,
+} from '../../config/constants';
 import { applyQuantity, applySelection } from '../../utils/applySelection';
 import { getEffectivePrice } from '../../utils/getEffectivePrice';
 import type { AccessoryGroup } from '../../utils/groupAccessories/types';
@@ -28,11 +34,12 @@ export const useAccessorySelection = () => {
     adding: false,
   }));
 
-  const { fetchProductRecommended } = useProductRecommended(STATE_KEY);
   const { addItemsToCart } = useCart();
 
   /**
    * @description Holt das gepflegte Cross-Selling vom Typ "Zubehoer" - ein Aufruf, keine Schleife.
+   * Direkt ueber das SDK statt ueber useProductRecommended: die Kern-Composable kappt bei 20
+   * Treffern, eine Magnettafel cross-sellt aber bis zu 38 Magnete.
    * @param product Der Artikel der Produktseite.
    * @return Promise<Product[]>
    * @example
@@ -53,12 +60,19 @@ export const useAccessorySelection = () => {
     state.value.variationId = productGetters.getVariationId(product);
 
     try {
-      state.value.products = await fetchProductRecommended({
+      const { data } = await useSdk().plentysystems.getFacet({
         type: CROSS_SELLING_TYPE,
         crossSellingRelation: CROSS_SELLING_RELATION_ACCESSORY,
         itemId,
-        categoryId: (productGetters.getCategoryIds(product)[0] ?? DEFAULT_CATEGORY_ID).toString(),
+        // getCategoryIds liefert [''] ohne Kategorie - dann geht die 0 raus
+        categoryId: productGetters.getCategoryIds(product)[0] || DEFAULT_CATEGORY_ID,
+        itemsPerPage: ACCESSORY_ITEMS_PER_PAGE,
+        sort: ACCESSORY_SORT,
       });
+
+      state.value.products = data?.products ?? [];
+    } catch (error) {
+      useHandleError(error as ApiError);
     } finally {
       state.value.loading = false;
     }
@@ -112,9 +126,7 @@ export const useAccessorySelection = () => {
 
   const isMainProduct = (variationId: number) => state.value.variationId > 0 && state.value.variationId === variationId;
 
-  const selectedProducts = computed(() =>
-    state.value.products.filter((product) => isSelected(product)),
-  );
+  const selectedProducts = computed(() => state.value.products.filter((product) => isSelected(product)));
 
   const accessoriesTotal = computed(() =>
     selectedProducts.value.reduce((total, product) => total + getEffectivePrice(product) * quantityOf(product), 0),

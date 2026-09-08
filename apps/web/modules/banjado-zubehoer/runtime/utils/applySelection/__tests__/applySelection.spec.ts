@@ -12,8 +12,9 @@ const warningSign = buildProduct(2001);
 
 const buildGroup = (mode: AccessoryGroup['mode'], items: Product[]): AccessoryGroup => ({
   id: 'group',
-  title: 'Gruppe',
+  titleKey: 'banjadoAccessories.groups.group',
   mode,
+  initiallyOpen: false,
   items,
 });
 

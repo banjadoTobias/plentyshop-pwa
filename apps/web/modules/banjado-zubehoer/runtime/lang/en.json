@@ -3,6 +3,15 @@
     "title": "Matching accessories",
     "hint": "add them if you like",
     "fallbackGroup": "Matching accessories",
+    "groups": {
+      "kreidestifte": "Chalk markers",
+      "magnete": "Magnets",
+      "befestigung": "Mounting",
+      "briefkastenstaender": "Mailbox stands",
+      "warnschild": "Warning sign",
+      "namensschild": "Name plate"
+    },
+    "groupItemCount": "{count} item | {count} items",
     "groupSelectedOne": "{name} · + {price}",
     "groupSelectedMany": "{count} selected · + {price}",
     "selectItem": "Select {name}",

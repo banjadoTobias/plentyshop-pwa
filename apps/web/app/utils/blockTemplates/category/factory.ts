@@ -3,11 +3,16 @@ import { v4 as uuid } from 'uuid';
 
 /**
  * banjado-Kategorieseite nach dem abgenommenen Prototyp v2 (17.08.2026):
- * Kategoriename samt Beschreibung oben, links die Facetten-Sidebar nach dem
+ * oben nur der Kategoriename, links die Facetten-Sidebar nach dem
  * Otto/IKEA-Muster (zuerst die gepflegten Plenty-Facetten, dann der Preis),
  * rechts das Raster mit ruhigen Kacheln - Name, Preis, Bewertung, Merkzettel,
  * kein Kaufknopf in der Kachel. Kein Motiv-Peek und kein Zweitbild beim
- * Hover (verworfen, 17.08.2026).
+ * Hover (verworfen, 17.08.2026). Die Kategorietexte (Beschreibung 1 und 2)
+ * stehen als zweiter CategoryData-Block UNTER dem Raster (Vorgabe 07.09.2026):
+ * erst kaufen, dann lesen.
+ *
+ * Achtung: das ist nur der Ausgangswert. Sobald im Shop-Editor ein Template
+ * fuer die Kategorieseite gespeichert wurde, gewinnt das gespeicherte.
  */
 export function createCategory(): Block[] {
   const categoryName = t('defaultTemplate.category.categoryData.name');
@@ -24,7 +29,7 @@ export function createCategory(): Block[] {
         name: categoryName,
         fields: {
           name: true,
-          description1: true,
+          description1: false,
           description2: false,
           shortDescription: false,
         },
@@ -138,6 +143,48 @@ export function createCategory(): Block[] {
           },
         },
       ],
+    },
+    {
+      // Kategorietexte unter dem Raster: Beschreibung 1 (SEO-Text samt FAQ) und
+      // Beschreibung 2. Der Name steht schon oben, darum hier aus.
+      name: 'CategoryData',
+      type: 'content',
+      meta: {
+        uuid: uuid(),
+        isGlobalTemplate: false,
+      },
+      content: {
+        name: categoryName,
+        fields: {
+          name: false,
+          description1: true,
+          description2: true,
+          shortDescription: false,
+        },
+        fieldsOrder: ['name', 'description1', 'description2', 'shortDescription'],
+        fieldsDisabled: [],
+        displayCategoryImage: 'off',
+        image: {
+          fillMode: 'fill',
+          alt: '',
+          brightness: 0.75,
+        },
+        text: {
+          color: '#2A2E25',
+          bgColor: '#fff',
+          bgOpacity: 1,
+          textAlignment: 'left',
+          justify: 'top',
+          align: 'left',
+          background: true,
+        },
+        layout: {
+          paddingTop: 32,
+          paddingBottom: 24,
+          paddingLeft: 0,
+          paddingRight: 0,
+        },
+      },
     },
   ] as Block[];
 }

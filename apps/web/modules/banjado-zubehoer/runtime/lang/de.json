@@ -3,6 +3,15 @@
     "title": "Passendes Zubehör",
     "hint": "optional dazubestellen",
     "fallbackGroup": "Passendes Zubehör",
+    "groups": {
+      "kreidestifte": "Kreidestifte",
+      "magnete": "Magnete",
+      "befestigung": "Befestigung",
+      "briefkastenstaender": "Briefkastenständer",
+      "warnschild": "Warnschild",
+      "namensschild": "Namensschild"
+    },
+    "groupItemCount": "{count} Artikel",
     "groupSelectedOne": "{name} · + {price}",
     "groupSelectedMany": "{count} ausgewählt · + {price}",
     "selectItem": "{name} auswählen",

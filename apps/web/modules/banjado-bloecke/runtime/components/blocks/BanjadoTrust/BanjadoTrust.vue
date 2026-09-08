@@ -1,6 +1,8 @@
 <template>
   <section class="border-y border-[#DCEACB] bg-brand-green-tint" data-testid="banjado-trust">
-    <div class="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 md:px-6 lg:grid-cols-4 lg:gap-6">
+    <div
+      class="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 px-4 py-6 @sm:grid-cols-2 @md:px-6 @lg:grid-cols-4 @lg:gap-6"
+    >
       <div v-for="(item, index) in items" :key="index" class="flex items-start gap-3">
         <svg
           width="22"

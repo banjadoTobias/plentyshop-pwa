@@ -112,7 +112,8 @@
           </div>
         </template>
         <template v-if="key === 'rating' && configuration?.fields?.rating">
-          <div class="flex items-center pt-1 gap-1 mb-2">
+          <!-- banjado: keine leeren Sterne samt "0" in der Kachel, solange niemand bewertet hat -->
+          <div v-if="ratingCount > 0" class="flex items-center pt-1 gap-1 mb-2">
             <SfRating size="xs" :half-increment="true" :value="rating ?? 0" :max="5" />
             <SfCounter size="xs">{{ ratingCount }}</SfCounter>
           </div>

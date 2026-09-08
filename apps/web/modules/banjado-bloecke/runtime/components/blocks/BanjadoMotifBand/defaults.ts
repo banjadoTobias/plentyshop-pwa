@@ -4,6 +4,19 @@ import type { BlocksList } from '~/composables/useBlocksList/types';
 
 const MOTIF_CDN = 'https://banjado.s3.eu-central-1.amazonaws.com/banjado-Motivmappe/200x200px';
 
+/**
+ * Ziel ist die Katalogseite aus modules/banjado-motivkatalog. Ohne Trailing Slash: die PWA
+ * haengt ihn je nach Site-Setting (urlTrailingSlash) selbst an. Themen-Chips oeffnen den
+ * Katalog mit gesetztem Thema, Kacheln mit der Motivnummer als Suchbegriff — dieselben
+ * Query-Parameter, die runtime/utils/urlState im Katalog liest (thema, q).
+ */
+const CATALOG_PATH = '/motivauswahl';
+const CATALOG_THEME_PARAM = 'thema';
+const CATALOG_SEARCH_PARAM = 'q';
+
+const catalogThemeLink = (theme: string) => `${CATALOG_PATH}?${CATALOG_THEME_PARAM}=${encodeURIComponent(theme)}`;
+const catalogMotifLink = (number: string) => `${CATALOG_PATH}?${CATALOG_SEARCH_PARAM}=${encodeURIComponent(number)}`;
+
 /** Echte Motivnummern und Namen aus bilder.json, Stand 17.08.2026 (wie im Prototyp v2). */
 const WALL_MOTIFS: Array<[string, string]> = [
   ['10864', 'Funky Town'],
@@ -55,15 +68,15 @@ export const createBanjadoMotifBand = (): Block => ({
       description:
         'Filtern nach Thema, Farbe, Stil und Saison. Jedes Motiv hat eine eigene Seite mit allen Produkten, auf denen es zu haben ist — auffindbar über Google, nicht nur über unsere Suche.',
     },
-    chips: THEME_CHIPS.map(([label, count]) => ({ label, count, link: '/motivauswahl/' })),
+    chips: THEME_CHIPS.map(([label, count]) => ({ label, count, link: catalogThemeLink(label) })),
     wall: WALL_MOTIFS.map(([nr, name]) => ({
       image: `${MOTIF_CDN}/${nr}.webp`,
       alt: `Motiv ${name} · Nr. ${nr}`,
-      link: '/motivauswahl/',
+      link: catalogMotifLink(nr),
     })),
     button: {
       label: 'Katalog durchsuchen',
-      link: '/motivauswahl/',
+      link: CATALOG_PATH,
     },
   },
 });

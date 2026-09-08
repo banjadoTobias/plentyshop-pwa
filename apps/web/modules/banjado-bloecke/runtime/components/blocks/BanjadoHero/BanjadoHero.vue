@@ -4,7 +4,7 @@
     data-testid="banjado-hero"
   >
     <div
-      class="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-7 px-4 py-8 md:grid-cols-[1.05fr_0.95fr] md:gap-14 md:px-6 md:py-14"
+      class="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-7 px-4 py-8 @md:grid-cols-[1.05fr_0.95fr] @md:gap-14 @md:px-6 @md:py-14"
     >
       <div>
         <p v-if="content.text?.eyebrow" class="mb-3.5 text-xs font-bold uppercase tracking-[0.09em] text-brand-ink-3">
@@ -12,10 +12,10 @@
         </p>
         <!-- eslint-disable-next-line vue/no-v-html — Inhalt kommt aus dem Editor, wie bei TextCard -->
         <h1
-          class="text-4xl font-bold leading-[1.06] tracking-tight text-brand-ink md:text-[52px] [&_em]:not-italic [&_em]:text-brand-green-ink"
+          class="text-4xl font-bold leading-[1.06] tracking-tight text-brand-ink @md:text-[52px] [&_em]:not-italic [&_em]:text-brand-green-ink"
           v-html="content.text?.titleHtml"
         />
-        <p v-if="content.text?.lead" class="mt-4 max-w-[44ch] text-base text-brand-ink-2 md:text-lg">
+        <p v-if="content.text?.lead" class="mt-4 max-w-[44ch] text-base text-brand-ink-2 @md:text-lg">
           {{ content.text.lead }}
         </p>
 
@@ -51,13 +51,13 @@
           class="m-0 overflow-hidden rounded-brand bg-white shadow-brand"
           :class="index === 0 ? 'row-span-2 h-full' : 'aspect-square'"
         >
+          <!-- kein sizes-Attribut: bei image.provider 'none' entsteht daraus kein srcset -->
           <NuxtImg
             :src="image.url"
             :alt="image.alt"
             class="h-full w-full object-cover"
             :loading="index === 0 ? 'eager' : 'lazy'"
             :preload="index === 0"
-            sizes="sm:100vw md:640px"
           />
         </figure>
       </div>

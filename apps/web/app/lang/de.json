@@ -303,8 +303,8 @@
         "createdAt_desc": "Neueste Artikel",
         "number_asc": "Variantennummer ⬆",
         "number_desc": "Variantennummer ⬇",
-        "position_asc": "Meistverkaufte Artikel ⬆",
-        "position_desc": "Meistverkaufte Artikel ⬇",
+        "position_asc": "Beliebteste zuletzt",
+        "position_desc": "Beliebteste zuerst",
         "updatedAt_asc": "Letzte Aktualisierung",
         "updatedAt_desc": "Erste Aktualisierung"
       }

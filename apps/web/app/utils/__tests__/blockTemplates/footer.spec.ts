@@ -4,6 +4,11 @@ import {
   migrateLegacyFooterToContainer,
 } from '~/utils/blockTemplates/footer/factory';
 import type { Block } from '@plentymarkets/shop-api';
+import {
+  BANJADO_FOOTER_BACKGROUND,
+  BANJADO_FOOTER_BLOCK_NAME,
+  BANJADO_FOOTER_TEXT,
+} from '~~/modules/banjado-bloecke/runtime/components/blocks/BanjadoFooter/constants';
 
 describe('createFooterContainer', () => {
   it('should create a FooterContainer block', () => {
@@ -32,38 +37,30 @@ describe('createFooterContainer', () => {
     expect(footer.meta.isGlobalTemplate).toBe(true);
   });
 
-  it('should have two top-level children: MultiGrid and TextCard', () => {
+  it('should have exactly one top-level child: the banjado footer block', () => {
     const footer = createFooterContainer();
     const content = footer.content as Block[];
     expect(Array.isArray(content)).toBe(true);
-    expect(content).toHaveLength(2);
-    expect(content[0]?.name).toBe('MultiGrid');
-    expect(content[1]?.name).toBe('TextCard');
+    expect(content).toHaveLength(1);
+    expect(content[0]?.name).toBe(BANJADO_FOOTER_BLOCK_NAME);
+    expect(content[0]?.type).toBe('content');
   });
 
-  it('should have a MultiGrid with five TextCard columns', () => {
+  it('should give the banjado footer block a non-empty content object', () => {
+    // Ein Block mit leerem content wird komplett ausgeblendet (isBlockEmpty).
     const footer = createFooterContainer();
-    const multiGrid = (footer.content as Block[])[0];
-    const columns = multiGrid?.content as Block[];
-    expect(Array.isArray(columns)).toBe(true);
-    expect(columns).toHaveLength(5);
-    columns.forEach((col) => expect(col.name).toBe('TextCard'));
+    const child = (footer.content as Block[])[0];
+    const childContent = child?.content as Record<string, unknown>;
+    expect(childContent).toBeTypeOf('object');
+    expect(Object.keys(childContent).length).toBeGreaterThan(0);
   });
 
-  it('should assign parent_slot 0–4 to the five column blocks', () => {
+  it('should give the child block its own uuid and not mark it as global template', () => {
     const footer = createFooterContainer();
-    const multiGrid = (footer.content as Block[])[0];
-    const columns = multiGrid?.content as Block[];
-    columns.forEach((col, i) => {
-      expect((col as Block & { parent_slot: number }).parent_slot).toBe(i);
-    });
-  });
-
-  it('should have MultiGrid with five equal column widths', () => {
-    const footer = createFooterContainer();
-    const multiGrid = (footer.content as Block[])[0];
-    const config = multiGrid?.configuration as unknown as { columnWidths: number[] };
-    expect(config?.columnWidths).toEqual([3, 3, 3, 3, 3]);
+    const child = (footer.content as Block[])[0];
+    expect(child?.meta.uuid).toBeTruthy();
+    expect(child?.meta.uuid).not.toBe(footer.meta.uuid);
+    expect(child?.meta.isGlobalTemplate).toBe(false);
   });
 
   it('should have color configuration in footer container', () => {
@@ -72,14 +69,18 @@ describe('createFooterContainer', () => {
     expect(footer.configuration?.colors?.text).toBeDefined();
   });
 
-  it('should have a button with cancellation form link in the fifth column', () => {
+  it('should paint the container frame in brand sand with ink-2 text so frame and block form one surface', () => {
     const footer = createFooterContainer();
-    const multiGrid = (footer.content as Block[])[0];
-    const columns = multiGrid?.content as Block[];
-    const lastColumn = columns[4];
-    const button = (lastColumn?.content as { button: { label: string; link: string } }).button;
-    expect(button.link).toBe(paths.cancellationForm);
-    expect(button.label).toBeTruthy();
+    expect(footer.configuration?.colors?.background).toBe(BANJADO_FOOTER_BACKGROUND);
+    expect(footer.configuration?.colors?.text).toBe(BANJADO_FOOTER_TEXT);
+    expect(footer.configuration?.colors?.background).toBe('#F8F7F3');
+    expect(footer.configuration?.colors?.text).toBe('#4A5145');
+  });
+
+  it('should create fresh uuids on every call', () => {
+    const first = createFooterContainer();
+    const second = createFooterContainer();
+    expect(first.meta.uuid).not.toBe(second.meta.uuid);
   });
 });
 

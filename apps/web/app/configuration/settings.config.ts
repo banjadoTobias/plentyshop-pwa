@@ -86,11 +86,17 @@ export default {
   horizontalBlockSize: process.env.NUXT_PUBLIC_HORIZONTAL_BLOCK_SIZE || 's',
   // Wird zu primary-500; die Palette leitet 50 bis 900 daraus ab
   primaryColor: process.env.NUXT_PUBLIC_PRIMARY_COLOR || '#79A84A',
-  defaultSortingOption: process.env.NUXT_PUBLIC_DEFAULT_SORTING_OPTION ?? 'texts.name1_asc',
+  // Standardsortierung der Kategorieseite: Positionsnummer der Variante absteigend
+  // (Vorgabe 07.09.2026; Label "Beliebteste zuerst"). Der Schluessel muss auch in
+  // availableSortingOptions stehen, sonst zeigt das Dropdown etwas anderes als die
+  // API sortiert. Nur der Ausgangswert: ein im Shop-Editor gespeicherter Wert
+  // (Settings > Category > Sorting) ueberschreibt diesen Default dauerhaft.
+  // itemSortByMonthlySales muss '0' bleiben, sonst ist die Position der Verkaufsrang.
+  defaultSortingOption: process.env.NUXT_PUBLIC_DEFAULT_SORTING_OPTION ?? 'variation.position_desc',
   defaultSortingSearch: process.env.NUXT_PUBLIC_DEFAULT_SORTING_SEARCH ?? 'item.score',
   availableSortingOptions:
     process.env.NUXT_PUBLIC_AVAILABLE_SORTING_OPTIONS ||
-    '["item.score","texts.name1_asc","default.recommended_sorting","sorting.price.avg_asc","sorting.price.avg_desc","variation.availability.averageDays_asc","variation.availability.averageDays_desc"]',
+    '["variation.position_desc","item.score","texts.name1_asc","default.recommended_sorting","sorting.price.avg_asc","sorting.price.avg_desc","variation.availability.averageDays_asc","variation.availability.averageDays_desc"]',
   recommendedFirstSortingOption: process.env.NUXT_PUBLIC_RECOMMENDED_FIRST_SORTING_OPTION ?? 'variation.position_desc',
   recommendedSecondSortingOption: process.env.NUXT_PUBLIC_RECOMMENDED_SECOND_SORTING_OPTION ?? 'sorting.price.avg_asc',
   recommendedThirdSortingOption:

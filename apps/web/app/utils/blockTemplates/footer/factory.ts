@@ -8,6 +8,11 @@ import type { ButtonConfig } from './types';
 import { FOOTER_SWITCH_DEFINITIONS } from '~/components/blocks/structure/FooterContainer/constants';
 import { v4 as uuid } from 'uuid';
 import { SfButtonVariant } from '@storefront-ui/vue';
+import { createBanjadoFooter } from '~~/modules/banjado-bloecke/runtime/components/blocks/BanjadoFooter/defaults';
+import {
+  BANJADO_FOOTER_BACKGROUND,
+  BANJADO_FOOTER_TEXT,
+} from '~~/modules/banjado-bloecke/runtime/components/blocks/BanjadoFooter/constants';
 
 export const FOOTER_CONTAINER_BLOCK_NAME = 'FooterContainer' as const;
 const LEGACY_FOOTER_BLOCK_NAME = 'Footer' as const;
@@ -67,7 +72,10 @@ function createFooterColumnTextCard(parentSlot: number, htmlDescription = '', bu
   };
 }
 
-function createFooterNoteTextCard(): Block {
+// Upstream-Bausteine des Standard-Footers. Seit der banjado-Fusszeile nicht mehr in
+// createFooterContainer() verwendet, bleiben aber fuer Upstream-Merges erhalten (exportiert,
+// damit sie keine toten lokalen Funktionen sind).
+export function createFooterNoteTextCard(): Block {
   const runtimeConfig = useRuntimeConfig();
 
   return {
@@ -100,7 +108,7 @@ function createFooterNoteTextCard(): Block {
   };
 }
 
-function createFooterMultiGrid(): Block {
+export function createFooterMultiGrid(): Block {
   return {
     name: 'MultiGrid',
     type: 'structure',
@@ -132,6 +140,12 @@ function createFooterMultiGrid(): Block {
   };
 }
 
+/**
+ * banjado: Der Footer besteht aus genau einem Kind, dem Block BanjadoFooter (Modul banjado-bloecke).
+ * Der Container faerbt seinen eigenen Rahmen (pt-10) in brand-sand/brand-ink-2, damit Rahmen und
+ * Block eine Flaeche bilden. Greift nur, solange im Editor kein FooterContainer gespeichert wurde
+ * (resolveFooter in utils/blocks/block-helpers.ts).
+ */
 export function createFooterContainer(): FooterContainerBlock {
   return {
     name: FOOTER_CONTAINER_BLOCK_NAME,
@@ -140,12 +154,12 @@ export function createFooterContainer(): FooterContainerBlock {
       uuid: uuid(),
       isGlobalTemplate: true,
     },
-    content: [createFooterMultiGrid(), createFooterNoteTextCard()],
+    content: [createBanjadoFooter()],
     configuration: {
       visible: true,
       colors: {
-        background: '#cfe4ec',
-        text: '#1c1c1c',
+        background: BANJADO_FOOTER_BACKGROUND,
+        text: BANJADO_FOOTER_TEXT,
       },
     },
   };

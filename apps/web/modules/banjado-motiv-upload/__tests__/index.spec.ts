@@ -1,7 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import motivUploadModule from '../index';
 
+const addComponent = vi.fn();
+
 vi.mock('nuxt/kit', () => ({
+  addComponent: (...args: unknown[]) => addComponent(...args),
   createResolver: () => ({
     resolve: (path: string) => path,
   }),
@@ -11,7 +14,6 @@ vi.mock('nuxt/kit', () => ({
 type ComponentEntry = {
   pascalName: string;
   filePath: string;
-  shortPath: string;
 };
 
 type ComponentsExtendHook = (components: ComponentEntry[]) => void;
@@ -19,6 +21,8 @@ type ComponentsExtendHook = (components: ComponentEntry[]) => void;
 type NuxtMock = {
   hook: (name: string, handler: ComponentsExtendHook) => void;
 };
+
+const MODULE_COPY = './runtime/components/OrderProperties.vue';
 
 const setupMotivUploadModule = () => {
   const hooks: { 'components:extend'?: ComponentsExtendHook } = {};
@@ -34,37 +38,56 @@ const setupMotivUploadModule = () => {
   return hooks;
 };
 
-const coreComponent = (pascalName: string): ComponentEntry => ({
-  pascalName,
-  filePath: `app/components/${pascalName}/${pascalName}.vue`,
-  shortPath: `app/components/${pascalName}/${pascalName}.vue`,
-});
-
 describe('banjado-motiv-upload module', () => {
-  it('should point OrderProperties at the module copy', () => {
-    const hooks = setupMotivUploadModule();
-    const orderProperties = coreComponent('OrderProperties');
-
-    hooks['components:extend']?.([orderProperties]);
-
-    expect(orderProperties.filePath).toBe('./runtime/components/OrderProperties.vue');
-    expect(orderProperties.shortPath).toBe('./runtime/components/OrderProperties.vue');
+  beforeEach(() => {
+    addComponent.mockClear();
   });
 
-  it('should leave every other component untouched', () => {
+  it('should register the module copy of OrderProperties with a priority above the core scan', () => {
+    setupMotivUploadModule();
+
+    expect(addComponent).toHaveBeenCalledTimes(1);
+    expect(addComponent).toHaveBeenCalledWith({
+      name: 'OrderProperties',
+      filePath: MODULE_COPY,
+      priority: 100,
+    });
+  });
+
+  it('should warn when the registry still points OrderProperties at the core', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const hooks = setupMotivUploadModule();
-    const fileUpload = coreComponent('OrderPropertyFileUpload');
-    const purchaseCard = coreComponent('PurchaseCard');
 
-    hooks['components:extend']?.([fileUpload, purchaseCard]);
+    hooks['components:extend']?.([
+      { pascalName: 'OrderProperties', filePath: 'app/components/OrderProperties/OrderProperties.vue' },
+    ]);
 
-    expect(fileUpload.filePath).toBe('app/components/OrderPropertyFileUpload/OrderPropertyFileUpload.vue');
-    expect(purchaseCard.filePath).toBe('app/components/PurchaseCard/PurchaseCard.vue');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('NICHT gegriffen'));
+    warn.mockRestore();
+  });
+
+  it('should stay quiet when the registry points at the module copy', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const hooks = setupMotivUploadModule();
+
+    hooks['components:extend']?.([
+      {
+        pascalName: 'OrderProperties',
+        filePath: 'modules/banjado-motiv-upload/runtime/components/OrderProperties.vue',
+      },
+    ]);
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it('should not break the build if the core component is ever renamed', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const hooks = setupMotivUploadModule();
 
-    expect(() => hooks['components:extend']?.([coreComponent('PurchaseCard')])).not.toThrow();
+    expect(() =>
+      hooks['components:extend']?.([{ pascalName: 'PurchaseCard', filePath: 'app/components/PurchaseCard.vue' }]),
+    ).not.toThrow();
+    warn.mockRestore();
   });
 });

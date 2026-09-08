@@ -11,7 +11,11 @@
       </div>
       <div class="py-2">
         <UiFormLabel>Beschreibung</UiFormLabel>
-        <textarea v-model="bandContent.text.description" rows="3" class="w-full rounded-md border border-gray-300 p-2 text-sm" />
+        <textarea
+          v-model="bandContent.text.description"
+          rows="3"
+          class="w-full rounded-md border border-gray-300 p-2 text-sm"
+        />
       </div>
       <div class="py-2">
         <UiFormLabel>Knopf — Beschriftung</UiFormLabel>

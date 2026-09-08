@@ -1,7 +1,7 @@
 <template>
   <section class="border-y border-brand-line bg-brand-sand" data-testid="banjado-motif-band">
     <div
-      class="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-7 px-4 py-9 md:px-6 md:py-14 lg:grid-cols-[340px_1fr] lg:gap-11"
+      class="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-7 px-4 py-9 @md:px-6 @md:py-14 @lg:grid-cols-[340px_1fr] @lg:gap-11"
     >
       <div>
         <p v-if="content.text?.eyebrow" class="text-xs font-bold uppercase tracking-[0.09em] text-brand-green-ink">
@@ -9,7 +9,7 @@
         </p>
         <!-- eslint-disable-next-line vue/no-v-html — Inhalt kommt aus dem Editor, wie bei TextCard -->
         <h2
-          class="mt-2.5 text-2xl font-semibold tracking-tight text-brand-ink md:text-[34px] md:leading-tight"
+          class="mt-2.5 text-2xl font-semibold tracking-tight text-brand-ink @md:text-[34px] @md:leading-tight"
           v-html="content.text?.titleHtml"
         />
         <p v-if="content.text?.description" class="mt-3.5 text-[15.5px] text-brand-ink-2">
@@ -37,7 +37,7 @@
         </NuxtLink>
       </div>
 
-      <div v-if="wall.length" class="grid grid-cols-4 gap-2 md:grid-cols-6 lg:grid-cols-8">
+      <div v-if="wall.length" class="grid grid-cols-4 gap-2 @md:grid-cols-6 @lg:grid-cols-8">
         <NuxtLink
           v-for="(tile, index) in wall"
           :key="index"

@@ -41,20 +41,27 @@ describe('headerQuickAddOptions', () => {
 });
 
 describe('footerQuickAddOptions', () => {
-  it('should contain 2 options', () => {
-    expect(footerQuickAddOptions).toHaveLength(2);
+  it('should contain 3 options', () => {
+    expect(footerQuickAddOptions).toHaveLength(3);
   });
 
-  it('should have Image and TextCard blocks', () => {
-    expect(footerQuickAddOptions.map((option) => option.blockName)).toEqual(['Image', 'TextCard']);
+  it('should have Image, TextCard and BanjadoFooter blocks', () => {
+    expect(footerQuickAddOptions.map((option) => option.blockName)).toEqual(['Image', 'TextCard', 'BanjadoFooter']);
   });
 
-  it('should have correct categories', () => {
-    expect(footerQuickAddOptions.map((option) => option.category)).toEqual(['image', 'text']);
+  it('should use the blocks-list key of the banjado footer as its category', () => {
+    // getBlockTemplateByLanguage liest blocksLists[category]; der Schluessel im Modul heisst banjadoFooter.
+    expect(footerQuickAddOptions.map((option) => option.category)).toEqual(['image', 'text', 'banjadoFooter']);
   });
 
   it('should all have variationIndex 0', () => {
-    expect(footerQuickAddOptions.map((option) => option.variationIndex)).toEqual([0, 0]);
+    expect(footerQuickAddOptions.map((option) => option.variationIndex)).toEqual([0, 0, 0]);
+  });
+
+  it('should label the banjado footer with a readable title instead of the block name', () => {
+    const banjadoOption = footerQuickAddOptions.find((option) => option.blockName === 'BanjadoFooter');
+    expect(banjadoOption?.label).toBeTruthy();
+    expect(banjadoOption?.label).not.toBe('BanjadoFooter');
   });
 });
 

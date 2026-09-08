@@ -1,0 +1,44 @@
+{
+  "banjadoMotivkatalog": {
+    "title": "Motif catalogue",
+    "metaTitle": "Motif catalogue: {count} motifs for every banjado product",
+    "metaDescription": "All {count} banjado motifs at a glance. Filter by theme, colour, new arrivals and season and order any motif on mailboxes, toilet seats, hob covers and more.",
+    "intro": "{count} motifs, filterable by theme, colour, new arrivals and season. Every motif is available on every banjado product – click a motif to see all products with it.",
+    "facets": {
+      "thema": "Theme",
+      "farbe": "Colour",
+      "neu": "New arrivals",
+      "saison": "Season"
+    },
+    "filter": "Filter",
+    "openFilter": "Filter",
+    "closeFilter": "Close filters",
+    "resetFilters": "Reset filters",
+    "activeFilters": "Active filters",
+    "removeFilter": "Remove filter {value}",
+    "showResults": "Show {count} motif | Show {count} motifs",
+    "showAll": "Show all {count}",
+    "showLess": "Show less",
+    "popularThemes": "Popular themes",
+    "search": {
+      "label": "Search motif or number",
+      "placeholder": "Motif or number, e.g. 10864 or bamboo",
+      "clear": "Clear search"
+    },
+    "motifNoun": "motif | motifs",
+    "resultCount": "{count} motif | {count} motifs",
+    "shownOf": "{shown} of {total} shown",
+    "loadMore": "Load {count} more motifs",
+    "loading": "Loading motifs …",
+    "tile": {
+      "number": "No. {number}",
+      "alt": "Motif {title} · No. {number}",
+      "viewProducts": "See all products with this motif"
+    },
+    "empty": {
+      "title": "No motif found",
+      "text": "Adjust the filters or try a different search term."
+    },
+    "error": "The motif catalogue is not available right now. Please try again in a few minutes."
+  }
+}

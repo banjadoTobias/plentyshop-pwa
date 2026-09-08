@@ -1,0 +1,543 @@
+<!-- @overrides-core-block -->
+<!--
+  banjado-Override des Kern-Blocks UtilityBar (app/components/blocks/UtilityBar/UtilityBar.vue).
+  Einziger Zweck: Logo, Suche und Aktions-Icons der Desktop-Zeile auf die Content-Breite (1280px,
+  wie BanjadoHero) zentrieren, waehrend die Hintergrundflaeche edge-to-edge bleibt. Mobil-Zeile,
+  Suche, Konto-Dropdown, Login-Modal und NavbarBottom sind unveraenderte Kopie.
+  Bei Upstream-Updates: git diff gegen den Kern-Block, nur die markierten Stellen sind eigen.
+-->
+<template>
+  <div :style="headerPaletteStyle">
+    <header class="relative w-full @md:sticky @md:shadow-md">
+      <div
+        v-if="viewport.isLessThan('md')"
+        class="flex items-center w-full"
+        :style="{ backgroundColor: headerBackgroundColor }"
+        data-testid="navbar-top-mobile"
+      >
+        <div class="flex items-center flex-1 gap-2">
+          <UiButton
+            variant="tertiary"
+            square
+            :aria-label="t('common.navigation.openMenu')"
+            class="hover:!bg-header-400"
+            :style="{ color: iconColor }"
+            @click="openMegaMenu"
+          >
+            <SfIconMenu aria-hidden="true" />
+          </UiButton>
+          <NuxtLink
+            id="blockified-logo-mobile"
+            data-testid="logo-link"
+            :to="localePath(paths.home)"
+            :aria-label="t('common.actions.goToHomepage')"
+            class="focus-visible:outline focus-visible:outline-offset focus-visible:rounded-sm"
+          >
+            <UiLogo />
+          </NuxtLink>
+        </div>
+        <div class="flex items-center gap-2">
+          <UiButton
+            v-if="isActionVisible('language')"
+            variant="tertiary"
+            class="relative hover:!bg-header-400 active:!bg-header-400 rounded-md"
+            square
+            data-testid="open-languageselect-button"
+            :style="{ color: iconColor }"
+            :aria-label="t('common.navigation.languageSelector')"
+            :disabled="(showConfigurationDrawer && isEditing) || (showConfigurationDrawer && disableActions)"
+            @click="toggleLanguageSelect()"
+          >
+            <SfIconLanguage />
+          </UiButton>
+          <UiButton
+            variant="tertiary"
+            class="relative hover:!bg-header-400 active:!bg-header-400 rounded-md"
+            square
+            :style="{ color: iconColor }"
+            :aria-label="t('common.navigation.openSearchModal')"
+            @click="searchModalOpen"
+          >
+            <SfIconSearch />
+          </UiButton>
+        </div>
+      </div>
+
+      <!-- banjado: aeusserer Traeger edge-to-edge, innerer Container auf Content-Breite -->
+      <div
+        v-else
+        class="w-full border-0 border-neutral-200"
+        :style="{ backgroundColor: headerBackgroundColor, ...verticalPaddingStyles }"
+        data-testid="navbar-top-desktop"
+      >
+        <div :class="UTILITY_BAR_CONTAINER_CLASSES">
+          <UiButton
+            v-if="viewport.isLessThan('lg')"
+            variant="tertiary"
+            square
+            :aria-label="t('common.navigation.openMenu')"
+            class="mr-2 hover:!bg-header-400"
+            :style="{ color: iconColor }"
+            @click="openMegaMenu"
+          >
+            <SfIconMenu aria-hidden="true" />
+          </UiButton>
+
+          <div v-if="isSectionVisible('logo')" class="flex items-center justify-center" :style="slotStyle('logo')">
+            <NuxtLink
+              id="blockified-logo"
+              data-testid="logo-link"
+              :to="localePath(paths.home)"
+              :aria-label="t('common.actions.goToHomepage')"
+              class="text-white focus-visible:outline focus-visible:outline-offset focus-visible:rounded-sm"
+            >
+              <UiLogo />
+            </NuxtLink>
+          </div>
+
+          <div
+            v-if="isSectionVisible('search')"
+            ref="iconSearchContainerRef"
+            class="flex items-center justify-center min-w-0"
+            :style="slotStyle('search')"
+          >
+            <template v-if="isFullSearchMode">
+              <UiSearch class="w-full" />
+            </template>
+
+            <template v-else>
+              <div class="relative">
+                <Transition
+                  mode="out-in"
+                  enter-active-class="transition-opacity duration-120 ease-out"
+                  enter-from-class="opacity-0"
+                  enter-to-class="opacity-100"
+                  leave-active-class="transition-opacity duration-120 ease-out absolute inset-0"
+                  leave-from-class="opacity-100"
+                  leave-to-class="opacity-0"
+                  @after-leave="handleSearchAfterLeave"
+                >
+                  <UiSearch
+                    v-if="isIconSearchExpanded"
+                    class="w-full"
+                    style="transform-origin: center center"
+                    :close="collapseIconSearch"
+                  />
+                </Transition>
+                <UiButton
+                  v-if="showSearchIcon && !isIconSearchExpanded"
+                  variant="tertiary"
+                  square
+                  class="hover:!bg-header-400 rounded-md"
+                  :style="{ color: iconColor }"
+                  :aria-label="t('common.actions.search')"
+                  @click="expandIconSearch"
+                >
+                  <SfIconSearch />
+                </UiButton>
+              </div>
+            </template>
+          </div>
+
+          <nav
+            v-if="isSectionVisible('actions')"
+            class="flex flex-row flex-nowrap items-center justify-center"
+            :style="slotStyle('actions')"
+          >
+            <template v-if="isActionVisible('language')">
+              <UiButton
+                v-if="!isLanguageSelectOpen"
+                class="group relative hover:!bg-header-400 active:!bg-header-400 mr-1 -ml-0.5 rounded-md cursor-pointer"
+                :aria-label="t('common.navigation.languageSelector')"
+                variant="tertiary"
+                :style="{ color: iconColor, order: getActionOrder('language') }"
+                square
+                data-testid="open-languageselect-button"
+                :disabled="(showConfigurationDrawer && isEditing) || (showConfigurationDrawer && disableActions)"
+                @click="toggleLanguageSelect()"
+              >
+                <template #prefix>
+                  <SfIconLanguage class="relative" />
+                </template>
+              </UiButton>
+              <UiButton
+                v-else
+                class="group relative hover:!bg-header-400 active:bg-header-400 mr-1 -ml-0.5 rounded-md cursor-pointer"
+                :aria-label="t('common.navigation.languageSelector')"
+                :style="{ color: isActive ? iconColor : '', order: getActionOrder('language') }"
+                variant="tertiary"
+                square
+                data-testid="open-languageselect-button"
+              >
+                <template #prefix>
+                  <SfIconLanguage class="relative" />
+                </template>
+              </UiButton>
+            </template>
+            <UiButton
+              v-if="isActionVisible('wishlist')"
+              class="group relative hover:!bg-header-400 active:bg-header-400 mr-1 -ml-0.5 rounded-md"
+              :tag="NuxtLink"
+              :to="localePath(paths.wishlist)"
+              :style="{ color: iconColor, order: getActionOrder('wishlist') }"
+              :aria-label="t('cart.numberInWishlist', { count: wishlistItemIds.length })"
+              variant="tertiary"
+              square
+              data-testid="wishlist-page-navigation"
+            >
+              <template #prefix>
+                <SfIconFavorite />
+                <SfBadge
+                  :content="wishlistItemIds.length"
+                  :style="{
+                    backgroundColor: iconColor,
+                    outlineColor: headerBackgroundColor,
+                    color: headerBackgroundColor,
+                  }"
+                  class="outline group-hover:outline-primary-800 group-active:outline-primary-700 flex justify-center items-center text-xs min-w-[16px] min-h-[16px]"
+                  data-testid="wishlist-badge"
+                  placement="top-right"
+                  :max="99"
+                />
+              </template>
+            </UiButton>
+            <UiButton
+              v-if="isActionVisible('cart')"
+              class="group relative hover:!bg-header-400 active:!bg-header-400 mr-1 -ml-0.5 rounded-md"
+              :tag="NuxtLink"
+              :style="{ color: iconColor, order: getActionOrder('cart') }"
+              :to="localePath(paths.cart)"
+              :aria-label="t('cart.numberInCart', { count: cartItemsCount })"
+              variant="tertiary"
+              square
+            >
+              <template #prefix>
+                <SfIconShoppingCart />
+                <SfBadge
+                  :content="cartItemsCount"
+                  :style="{
+                    backgroundColor: iconColor,
+                    outlineColor: headerBackgroundColor,
+                    color: headerBackgroundColor,
+                  }"
+                  class="outline group-hover:outline-primary-800 group-active:outline-primary-700 flex justify-center items-center text-xs min-w-[16px] min-h-[16px]"
+                  data-testid="cart-badge"
+                  placement="top-right"
+                  :max="99"
+                />
+              </template>
+            </UiButton>
+            <div
+              v-if="isAuthorized && isActionVisible('account')"
+              ref="accountDropdownTriggerRef"
+              :style="{ order: getActionOrder('account') }"
+            >
+              <UiButton
+                variant="tertiary"
+                class="relative hover:bg-header-400 active:bg-header-400 rounded-md"
+                :style="{ color: iconColor, order: getActionOrder('account') }"
+                :class="{ 'bg-primary-700': isAccountDropdownOpen }"
+                data-testid="account-dropdown-button"
+                @click="accountDropdownToggle()"
+              >
+                <template #prefix>
+                  <SfIconPerson />
+                </template>
+                {{ user?.firstName }}
+              </UiButton>
+            </div>
+            <Teleport to="body">
+              <div
+                v-if="isAccountDropdownOpen"
+                ref="accountDropdownRef"
+                class="z-dropdown"
+                :style="accountDropdownFloatingStyles"
+              >
+                <ul
+                  class="rounded bg-white shadow-md border border-neutral-100 text-neutral-900 min-w-[152px] py-2 [&_a]:no-underline [&_a]:text-neutral-900"
+                >
+                  <li v-for="({ label, link }, labelIndex) in accountDropdown" :key="`label-${labelIndex}`">
+                    <template v-if="label === t('account.logout')">
+                      <UiDivider class="my-2" />
+                      <SfListItem
+                        tag="button"
+                        class="text-left"
+                        data-testid="account-dropdown-logout-item"
+                        @click="logOut()"
+                      >
+                        {{ label }}
+                      </SfListItem>
+                    </template>
+                    <SfListItem
+                      v-else
+                      :tag="NuxtLink"
+                      :to="link"
+                      :class="{ 'bg-neutral-200': route.path === link }"
+                      data-testid="account-dropdown-list-item"
+                      @click="closeAccountDropdown()"
+                    >
+                      {{ label }}
+                    </SfListItem>
+                  </li>
+                </ul>
+              </div>
+            </Teleport>
+            <UiButton
+              v-if="!isAuthorized && isActionVisible('account')"
+              :style="{ color: iconColor, order: getActionOrder('account') }"
+              class="group relative hover:!bg-header-400 active:!bg-header-400 mr-1 -ml-0.5 rounded-md"
+              variant="tertiary"
+              :aria-label="t('authentication.login.openLoginForm')"
+              square
+              @click="navigateToLogin"
+            >
+              <SfIconPerson />
+            </UiButton>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <BlocksNavbarBottom
+      v-if="viewport.isLessThan('md')"
+      :background-color="headerBackgroundColor"
+      :icon-color="iconColor"
+      :action-order="content.actions.order"
+      :action-visibility="content.actions.visibility"
+    />
+    <LanguageSelector />
+    <UiModal
+      v-if="viewport.isGreaterOrEquals('md') && isAuthenticationOpen"
+      v-model="isAuthenticationOpen"
+      tag="section"
+      class="h-full @md:w-[500px] @md:h-fit m-0 p-0 overflow-y-auto"
+    >
+      <header>
+        <UiButton
+          :aria-label="t('common.navigation.closeDialog')"
+          square
+          variant="tertiary"
+          class="absolute right-2 top-2"
+          @click="closeAuthentication"
+        >
+          <SfIconClose />
+        </UiButton>
+      </header>
+
+      <LoginComponent
+        v-if="isLogin"
+        :is-modal="true"
+        @change-view="isLogin = false"
+        @logged-in="navigateAfterAuth(true)"
+      />
+      <Register v-else :is-modal="true" @change-view="isLogin = true" @registered="closeAuthentication" />
+    </UiModal>
+
+    <NuxtLazyHydrate v-if="viewport.isLessThan('lg')" when-idle>
+      <SfModal
+        v-model="isSearchModalOpen"
+        class="w-full h-full z-modal"
+        tag="section"
+        role="dialog"
+        aria-labelledby="search-modal-title"
+      >
+        <header class="mb-4">
+          <UiButton
+            :aria-label="t('common.navigation.closeDialog')"
+            square
+            variant="tertiary"
+            class="absolute right-4 top-2"
+            @click="searchModalClose"
+          >
+            <SfIconClose class="text-neutral-500" />
+          </UiButton>
+          <h3 id="search-modal-title" class="absolute left-6 top-4 font-bold typography-headline-4 mb-4">
+            {{ t('common.actions.search') }}
+          </h3>
+        </header>
+        <UiSearch class="w-[100%]" :close="searchModalClose" />
+      </SfModal>
+    </NuxtLazyHydrate>
+  </div>
+</template>
+
+<script setup lang="ts">
+import {
+  SfBadge,
+  SfIconClose,
+  SfIconLanguage,
+  SfIconMenu,
+  SfIconPerson,
+  SfIconSearch,
+  SfIconShoppingCart,
+  SfListItem,
+  SfModal,
+  SfIconFavorite,
+  useDisclosure,
+} from '@storefront-ui/vue';
+import { useFloating, flip, offset, shift } from '@floating-ui/vue';
+import { onClickOutside } from '@vueuse/core';
+import LanguageSelector from '~/components/LanguageSelector/LanguageSelector.vue';
+
+import type { UtilityBarComponentProps } from '~/components/blocks/UtilityBar/types';
+
+const props = withDefaults(defineProps<UtilityBarComponentProps>(), {
+  enableActions: false,
+  root: true,
+});
+
+const isLogin = ref(true);
+const { data: cart } = useCart();
+const { wishlistItemIds } = useWishlist();
+const cartItemsCount = ref(0);
+const { open: openMegaMenu } = useMegaMenu();
+
+const { content, sections, isSectionVisible, getSectionFlexOrder, isActionVisible, getActionOrder, isFullSearchMode } =
+  useUtilityBarConfiguration(props.meta?.uuid);
+
+// --- banjado: Desktop-Zeile in Traeger (edge-to-edge) und Container (Content-Breite) aufgeteilt ---
+
+/**
+ * Innerer Container der Header-Zeile. Gleiche Breite und gleicher Innenabstand wie die
+ * Kategorie-Leiste und die banjado-Bloecke (BanjadoHero: px-4 md:px-6), damit Logo, Kategorie-
+ * Buttons und Seiteninhalt an einer Kante fluchten. Das Editor-Padding links/rechts wird deshalb
+ * bewusst nicht mehr angewendet (es wuerde die px-Klassen per Inline-Style ueberschreiben).
+ */
+const UTILITY_BAR_CONTAINER_CLASSES = 'mx-auto flex w-full max-w-[1280px] flex-nowrap items-center px-4 @md:px-6';
+
+/** Nur das vertikale Editor-Padding bleibt am Traeger; links/rechts regelt der innere Container. */
+const verticalPaddingStyles = computed(() => {
+  const layout = content.value?.layout;
+  return {
+    paddingTop: layout?.paddingTop != null ? `${layout.paddingTop}px` : undefined,
+    paddingBottom: layout?.paddingBottom != null ? `${layout.paddingBottom}px` : undefined,
+  };
+});
+
+// --- Ende banjado-Aenderung ---
+
+const iconColor = computed(() => content.value?.color?.iconColor || '');
+const headerBackgroundColor = computed(() => content.value?.color?.backgroundColor || '');
+const headerPaletteStyle = useGenerateTailwindPalette('header', headerBackgroundColor);
+
+const NuxtLink = resolveComponent('NuxtLink');
+const route = useRoute();
+const localePath = useLocalizedPath();
+const { isOpen: isAccountDropdownOpen, toggle: accountDropdownToggle, close: closeAccountDropdown } = useDisclosure();
+const accountDropdownTriggerRef = ref<HTMLElement | null>(null);
+const accountDropdownRef = ref<HTMLElement | null>(null);
+const { floatingStyles: accountDropdownFloatingStyles } = useFloating(accountDropdownTriggerRef, accountDropdownRef, {
+  placement: 'bottom-end',
+  middleware: [offset(4), flip(), shift()],
+});
+onClickOutside(accountDropdownRef, () => closeAccountDropdown(), { ignore: [accountDropdownTriggerRef] });
+const { isOpen: isAuthenticationOpen, open: openAuthentication, close: closeAuthentication } = useDisclosure();
+const { open: searchModalOpen, isOpen: isSearchModalOpen, close: searchModalClose } = useDisclosure();
+const { toggle: toggleLanguageSelect, isOpen: isLanguageSelectOpen } = useLocalization();
+const { user, isAuthorized, logout } = useCustomer();
+const viewport = useViewport();
+const runtimeConfig = useRuntimeConfig();
+const showConfigurationDrawer = runtimeConfig.public.showConfigurationDrawer;
+const { isEditing, disableActions } = useEditor();
+const isActive = computed(() => isLanguageSelectOpen);
+
+onNuxtReady(async () => {
+  cartItemsCount.value = cart.value?.items?.reduce((price, { quantity }) => price + quantity, 0) ?? 0;
+});
+
+const isIconSearchExpanded = ref(false);
+const showSearchIcon = ref(true);
+const isSearchClosing = ref(false);
+const iconSearchContainerRef = ref<HTMLElement | null>(null);
+
+const slotStyle = (sectionId: string) => {
+  const order = getSectionFlexOrder(sectionId);
+  const isMiddleSlot = order === 1 && sections.value.filter((section) => section.visible).length === 3;
+
+  if (isMiddleSlot) {
+    return { order, flex: '5', marginLeft: '16px', marginRight: '16px' };
+  }
+
+  const isTabletSearchSide = sectionId === 'search' && viewport.isGreaterOrEquals('md') && viewport.isLessThan('lg');
+  if (isTabletSearchSide) {
+    return { order, flex: '1', minWidth: '220px' };
+  }
+
+  return { order, flex: '1' };
+};
+
+const expandIconSearch = () => {
+  showSearchIcon.value = false;
+  isIconSearchExpanded.value = true;
+};
+
+const collapseIconSearch = () => {
+  isSearchClosing.value = true;
+  isIconSearchExpanded.value = false;
+  return true;
+};
+
+const handleSearchAfterLeave = () => {
+  showSearchIcon.value = true;
+  isSearchClosing.value = false;
+};
+
+onClickOutside(iconSearchContainerRef, () => {
+  if (isIconSearchExpanded.value) {
+    collapseIconSearch();
+  }
+});
+
+const navigateAfterAuth = (reload: boolean) => {
+  if (reload) {
+    window.location.reload();
+  } else {
+    closeAuthentication();
+  }
+};
+
+watch(
+  () => cart.value?.items,
+  (cartItems) => {
+    cartItemsCount.value = cartItems?.reduce((price, { quantity }) => price + quantity, 0) ?? 0;
+  },
+);
+
+watch(
+  () => isAuthenticationOpen.value,
+  () => (isLogin.value = true),
+);
+
+const logOut = () => handleLogout({ logout, toggle: accountDropdownToggle });
+
+const accountDropdown = computed(() => [
+  {
+    label: t('account.heading'),
+    link: localePath(paths.account),
+  },
+  {
+    label: t('account.ordersAndReturns.section.myOrders'),
+    link: localePath(paths.accountMyOrders),
+  },
+  {
+    label: t('account.ordersAndReturns.section.returns'),
+    link: localePath(paths.accountReturns),
+  },
+  {
+    label: t('account.logout'),
+  },
+]);
+const navigateToLogin = () => {
+  if (route.path !== localePath(paths.authLogin)) {
+    openAuthentication();
+  }
+};
+</script>
+<style scoped>
+:deep(input[data-testid='search-bar-input']) {
+  min-width: 0;
+}
+
+#blockified-logo :deep(img) {
+  max-width: inherit !important;
+}
+</style>

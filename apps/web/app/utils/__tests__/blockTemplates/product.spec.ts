@@ -13,7 +13,6 @@ describe('createProduct', () => {
     const blockNames = blocks.map((block) => block.name);
     expect(blockNames).toContain('MultiGrid');
     expect(blockNames).toContain('ItemText');
-    expect(blockNames).toContain('TechnicalData');
     expect(blockNames).toContain('CustomerReview');
     expect(blockNames).toContain('ProductLegalInformation');
     expect(blockNames).toContain('ProductRecommendedProducts');
@@ -47,6 +46,12 @@ describe('createProduct', () => {
     const content = itemTextBlock?.content as { text?: { title?: string } };
     expect(content?.text?.title).toBeDefined();
     expect(typeof content?.text?.title).toBe('string');
+  });
+
+  it('should not include TechnicalData (removed from the banjado template on purpose)', () => {
+    const blocks = createProduct();
+    const blockNames = blocks.map((block) => block.name);
+    expect(blockNames).not.toContain('TechnicalData');
   });
 
   it('should not include Footer (Footer is a global block)', () => {

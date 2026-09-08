@@ -303,8 +303,8 @@
         "createdAt_desc": "Newest items",
         "number_asc": "Variation number ⬆",
         "number_desc": "Variation number ⬇",
-        "position_asc": "Top seller ⬆",
-        "position_desc": "Top seller ⬇",
+        "position_asc": "Most popular last",
+        "position_desc": "Most popular first",
         "updatedAt_asc": "Last update",
         "updatedAt_desc": "First update"
       }

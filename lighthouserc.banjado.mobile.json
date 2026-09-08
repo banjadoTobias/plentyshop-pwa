@@ -1,0 +1,14 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://localhost:3000/?mobile",
+        "http://localhost:3000/briefkasten/briefkasten-modelle/briefkasten-gross/?mobile",
+        "http://localhost:3000/grosser-stahl-briefkasten-funky-town_2112266555/?mobile",
+        "http://localhost:3000/motivauswahl?mobile"
+      ],
+      "numberOfRuns": 2,
+      "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    }
+  }
+}

@@ -8,11 +8,12 @@ import { createBanjadoZubehoer } from '~~/modules/banjado-zubehoer/runtime/compo
  * (Name, Bewertung, Preis, Varianten, Bestelleigenschaften = Motiv/Upload/
  * Wunschtext, Menge + Warenkorb), darunter der Zubehoer-Kasten. Tags sind
  * bewusst aus - Entscheidung W3 (18.08.2026): kein Tag ist fuer Kunden
- * sichtbar, der Prototyp ist die Whitelist.
+ * sichtbar, der Prototyp ist die Whitelist. Der Block "Technische Daten"
+ * fehlt mit Absicht (Tobias, 07.09.2026: "Technische Daten kann weg");
+ * im Editor bleibt er weiter waehlbar.
  */
 export const createProduct = (): Block[] => {
   const itemTextTitle = t('defaultTemplate.product.itemText.title');
-  const technicalDataTitle = t('defaultTemplate.product.technicalData.title');
   const customerReviewTitle = t('defaultTemplate.product.customerReview.title');
   const legalInfoTitle = t('defaultTemplate.product.productLegalInformation.title');
   const legalInfoLinkText = t('defaultTemplate.product.productLegalInformation.linkText');
@@ -137,27 +138,6 @@ export const createProduct = (): Block[] => {
         layout: {
           displayAsCollapsable: true,
           initiallyCollapsed: false,
-          paddingTop: 0,
-          paddingBottom: 0,
-          paddingLeft: 0,
-          paddingRight: 0,
-        },
-      },
-    },
-    {
-      name: 'TechnicalData',
-      type: 'content',
-      meta: {
-        uuid: uuid(),
-        isGlobalTemplate: false,
-      },
-      content: {
-        text: {
-          title: technicalDataTitle,
-        },
-        layout: {
-          displayAsCollapsable: true,
-          initiallyCollapsed: true,
           paddingTop: 0,
           paddingBottom: 0,
           paddingLeft: 0,

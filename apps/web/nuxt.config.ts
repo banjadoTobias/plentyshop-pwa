@@ -64,7 +64,6 @@ export default defineNuxtConfig({
                 '@tiptap/extension-text-style',
               ],
               tiptap: ['@tiptap/'],
-              vuetify: ['vuetify/', '@mdi/js'],
             };
 
             for (const [chunk, packages] of Object.entries(vendorChunks)) {
@@ -82,7 +81,7 @@ export default defineNuxtConfig({
     compressPublicAssets: true,
   },
   routeRules: {
-    '/_ipx/**': { headers: { 'cache-control': `public, max-age=31536000, immutable` } },
+    // Keine /_ipx-Regel: image.provider ist 'none', ipx laeuft nicht, die Route existiert nicht.
     '/_nuxt-plenty/icons/**': { headers: { 'cache-control': `public, max-age=31536000, immutable` } },
     '/_nuxt-plenty/favicon.ico': { headers: { 'cache-control': `public, max-age=86400` } },
     '/_nuxt-plenty/images/**': { headers: { 'cache-control': `max-age=604800` } },
@@ -117,6 +116,10 @@ export default defineNuxtConfig({
     // vor @nuxtjs/i18n, sonst ist der Hook i18n:registerModule schon gelaufen
     // und im Zubehoer-Kasten stuenden die rohen Uebersetzungsschluessel
     '~~/modules/banjado-zubehoer',
+    // Motivkatalog bringt eigene Sprachdateien mit, deshalb ebenfalls vor @nuxtjs/i18n.
+    // Nuxt wuerde modules/* auch von allein einsammeln - dann aber erst NACH den
+    // hier gelisteten Modulen, also zu spaet fuer i18n:registerModule.
+    '~~/modules/banjado-motivkatalog',
     '@nuxtjs/i18n',
     '~~/modules/locale-routes',
     '@nuxtjs/tailwindcss',
@@ -125,23 +128,14 @@ export default defineNuxtConfig({
     'nuxt-viewport',
     '@vee-validate/nuxt',
     '@vite-pwa/nuxt',
-    'vuetify-nuxt-module',
+    // 'vuetify-nuxt-module' bewusst NICHT geladen (Stand 08.09.2026): das Modul haengt
+    // createVuetify() als Client-Plugin an jede Seite (243 KB roh / 67 KB brotli JS je
+    // Aufruf), genutzt wurde Vuetify aber nur vom Editor-Bildwaehler UiImageTable.
+    // Den ersetzt modules/banjado-bloecke/runtime/components/UiImageTable.vue ohne Vuetify.
+    // Die Pakete vuetify-nuxt-module und @mdi/js bleiben in package.json installiert
+    // (ungenutzt), damit ein Upstream-Merge nicht an der Abhaengigkeit scheitert.
     'nuxt-color-picker',
   ],
-  vuetify: {
-    moduleOptions: {
-      prefixComposables: true,
-      disableVuetifyStyles: true,
-    },
-    vuetifyOptions: {
-      icons: {
-        defaultSet: 'mdi-svg',
-      },
-      theme: {
-        defaultTheme: 'light',
-      },
-    },
-  },
   plentySitemap: {
     locales: (process.env.LANGUAGELIST || 'en,de').split(','),
     defaultLocale: nuxtI18nOptions.defaultLocale,
@@ -174,10 +168,11 @@ export default defineNuxtConfig({
     confirmationUrl: paths.confirmation,
   },
   fonts: {
-    // Vuetify bringt font-family:var(--v-font-body,"Roboto",sans-serif) ins CSS.
-    // @nuxt/fonts findet das und laedt Roboto von Google nach — provider 'none'
-    // unterbindet das. Zusammen mit dem System-Stapel in tailwind.config.ts
-    // laedt der Shop damit keine einzige Schriftdatei mehr.
+    // Vuetify brachte font-family:var(--v-font-body,"Roboto",sans-serif) ins CSS;
+    // @nuxt/fonts fand das und lud Roboto von Google nach. Vuetify ist inzwischen raus,
+    // der Eintrag bleibt als Sicherung: taucht "Roboto" ueber ein anderes Paket wieder
+    // im CSS auf, laedt trotzdem nichts. Zusammen mit dem System-Stapel in
+    // tailwind.config.ts laedt der Shop keine einzige Schriftdatei.
     families: [{ name: 'Roboto', provider: 'none' }],
     defaults: {
       weights: [300, 400, 500, 700],
@@ -228,7 +223,13 @@ export default defineNuxtConfig({
     registerType: 'prompt',
     workbox: {
       navigateFallback: null,
-      globPatterns: ['**/*.{js,json,css,html,ico,svg,png,webp,ico,woff,woff2,ttf,eit,otf}', '_nuxt-plenty/icons/*'],
+      // Nur die App-Icons vorab cachen. Mit '**/*.{js,css,...}' lud der Service Worker
+      // jedem Erstbesucher den kompletten Build (531 JS-Chunks, 5,6 MB, inkl. Editor)
+      // im Hintergrund nach - mobil Datenvolumen und Akku ohne Nutzen. Die JS-Chunks
+      // haengen ohnehin am HTTP-Cache mit immutable-Headern. Die Offline-Seite kommt
+      // weiterhin ueber additionalManifestEntries in den Precache, Bilder ueber den
+      // Runtime-Cache unten.
+      globPatterns: ['_nuxt-plenty/icons/*'],
       globIgnores: ['manifest**.webmanifest'],
       additionalManifestEntries: [
         {

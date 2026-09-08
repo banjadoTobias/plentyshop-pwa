@@ -30,7 +30,10 @@ export const applySelection = (
   if (group.mode === SELECTION_MODE_SINGLE) {
     const siblings = group.items.map((item) => productGetters.getVariationId(item));
 
-    return [...selections.filter((selection) => !siblings.includes(selection.variationId)), { variationId, quantity: 1 }];
+    return [
+      ...selections.filter((selection) => !siblings.includes(selection.variationId)),
+      { variationId, quantity: 1 },
+    ];
   }
 
   return [...selections, { variationId, quantity: 1 }];
