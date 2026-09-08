@@ -82,3 +82,5 @@ apps/web/reference/
 .github/skills
 /AGENTS.md
 /GEMINI.md
+# Lokale Lighthouse-Berichte (npx lighthouse ... --output-path=.lighthouseci/*.json)
+.lighthouseci/
